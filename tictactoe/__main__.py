@@ -4,9 +4,8 @@ from tictactoe.game import Game
 
 def main() -> None:
     cli = CLI()
-    _ = Game(cli)
-    cli.begin_game()
-    cli.end_game()
+    game = Game(cli)
+    game.play()
 
 
 if __name__ == "__main__":

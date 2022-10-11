@@ -11,6 +11,17 @@ def empty_grid() -> Grid:
 class Board:
     grid: Grid = field(default_factory=empty_grid)
 
+    def from_str(self, s: str):
+        rows = s.strip("\n").split("\n")
+        if len(rows) != GRID_SIZE:
+            raise ValueError("Not a valid string to describe a Board")
+        for row, row_str in enumerate(rows):
+            if len(row_str) != GRID_SIZE:
+                raise ValueError("Not a valid string to describe a Board")
+            for col, char in enumerate(row_str):
+                self.grid[Position(row, col)] = Symbol._value2member_map_[char]
+        return self
+
     def place(self, position: Position, symbol: Symbol) -> None:
         if self.grid[position] != Symbol.EMPTY:
             raise ValueError("Can't place a symbol on a non-empty grid cell.")
@@ -18,8 +29,8 @@ class Board:
 
     def __str__(self):
         s = ""
-        for line in range(GRID_SIZE):
+        for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
-                s += self.grid[Position(line, col)].value
+                s += self.grid[Position(row, col)].value
             s += "\n"
-        return s
+        return s.strip("\n")
