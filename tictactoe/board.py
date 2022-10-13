@@ -10,7 +10,7 @@ def empty_grid() -> Grid:
 
 @dataclass
 class Board:
-    grid: Grid = field(default_factory=empty_grid)
+    grid: Grid = field(default_factory=empty_grid, hash=True)
 
     @classmethod
     def from_str(cls, s: str) -> "Board":

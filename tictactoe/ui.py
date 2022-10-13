@@ -1,4 +1,4 @@
-from typing import Protocol
+from typing import List, Protocol
 
 
 class UI(Protocol):
@@ -9,4 +9,10 @@ class UI(Protocol):
         ...
 
     def refresh_board(self, board_str: str) -> None:
+        ...
+
+    def get_number_of_players(self) -> int:
+        ...
+
+    def display_player_names(self, players: List[str]) -> None:
         ...
