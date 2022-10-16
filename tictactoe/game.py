@@ -32,7 +32,7 @@ class Game:
     board: Board = field(default_factory=Board)
     num_players: int = field(init=False)
     players: List[Player] = field(default_factory=list, init=False)
-    first_to_play = 0
+    first_to_play: int = field(default=0, init=False)
 
     def play(self) -> None:
         self.ui.begin_game()
