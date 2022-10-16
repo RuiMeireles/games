@@ -14,7 +14,7 @@ class Player(ABC):
 
     @abstractmethod
     def play_move(self, board: Board) -> None:
-        raise NotImplementedError
+        pass
 
 
 @dataclass
@@ -33,5 +33,5 @@ class CPUPlayer(Player):
     strategy: Strategy
 
     def play_move(self, board: Board) -> None:
-        position = self.strategy.select_move(board)
+        position = self.strategy.select_move(board, self.symbol)
         board.place(position, self.symbol)
