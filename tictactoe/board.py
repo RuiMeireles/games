@@ -41,7 +41,7 @@ class Board:
 
     def place(self, position: Position, symbol: Symbol) -> None:
         if self.grid[position] != Symbol.EMPTY:
-            raise ValueError("Can't place a symbol on a non-empty grid cell.")
+            raise ValueError("Can't place a symbol on a non-empty position.")
         self.grid[position] = symbol
 
     def available_positions(self) -> List[Position]:
