@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 
 class CLI:
@@ -24,7 +24,22 @@ class CLI:
                 return int(text)
             print("Invalid number. Please try again.\n")
 
-    def display_player_names(self, players: List[str]) -> None:
+    def display_player_names(self, players: List[Dict[str, str]]) -> None:
+        """Takes a list of dict with keys ['name', 'value']"""
         for i, player in enumerate(players, 1):
-            print(f"Player #{i}: {player}")
+            print(f"Player #{i}: [{player['symbol']}] {player['name']}")
         print()
+
+    def display_positions(self) -> None:
+        print("These are the positions you can choose to place your symbol:\n")
+        board_str = "123\n456\n789"
+        self.refresh_board(board_str)
+
+    def players_turn(self, player_name: str) -> None:
+        print(f"It's {player_name} turn.\n")
+
+    def ends_with_win(self, player_name: str) -> None:
+        print(f"{player_name} wins.\n")
+
+    def ends_with_draw(self) -> None:
+        print("It's a draw.\n")

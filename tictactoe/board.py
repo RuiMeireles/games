@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, List
 
 from tictactoe.common import GRID_SIZE, Grid, Position, Symbol
 
@@ -76,3 +76,12 @@ class Board:
         if winner[Symbol.O]:
             return Symbol.O
         return Symbol.EMPTY
+
+    def available_positions(self) -> List[Position]:
+        available: List[Position] = []
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                position = Position(row, col)
+                if self.grid[position] == Symbol.EMPTY:
+                    available.append(position)
+        return available

@@ -1,4 +1,4 @@
-from typing import List, Protocol
+from typing import Dict, List, Protocol
 
 
 class UI(Protocol):
@@ -14,5 +14,18 @@ class UI(Protocol):
     def get_number_of_players(self) -> int:
         ...
 
-    def display_player_names(self, players: List[str]) -> None:
+    def display_player_names(self, players: List[Dict[str, str]]) -> None:
+        """Takes a list of dict with keys ['name', 'value']"""
+        ...
+
+    def display_positions(self) -> None:
+        ...
+
+    def players_turn(self, player_name: str) -> None:
+        ...
+
+    def ends_with_win(self, player_name: str) -> None:
+        ...
+
+    def ends_with_draw(self) -> None:
         ...
