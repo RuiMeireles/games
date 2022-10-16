@@ -19,9 +19,11 @@ SYMBOL_INDEX = {
 }
 
 
-def do_turn(ui: UI, player: Player) -> bool:
+def do_turn(ui: UI, board: Board, player: Player) -> bool:
     """Returns True if the player wins"""
     ui.players_turn(player.name)
+    player.play_move(board)
+    ui.display_board(str(board))
     return False
 
 
@@ -30,28 +32,28 @@ class Game:
     ui: UI
     scoreboard: Scoreboard = field(default_factory=Scoreboard)
     board: Board = field(default_factory=Board)
-    num_players: int = field(init=False)
+    num_human_players: int = field(init=False)
     players: List[Player] = field(default_factory=list, init=False)
-    first_to_play: int = field(default=0, init=False)
+    player1_starts: bool = field(default=True, init=False)
 
     def play(self) -> None:
         self.ui.begin_game()
 
         # Get the number of human players
-        self.num_players = self.ui.get_number_of_players()
-        for i, player_type in enumerate(PLAYER_COMBINATIONS[self.num_players]):
+        self.num_human_players = self.ui.get_number_of_human_players()
+        for i, player_type in enumerate(PLAYER_COMBINATIONS[self.num_human_players]):
             if player_type == HumanPlayer:
                 self.players.append(HumanPlayer(f"Human{i + 1}", SYMBOL_INDEX[i], self.ui))
             else:
                 self.players.append(CPUPlayer(f"CPU{i + 1}", SYMBOL_INDEX[i]))
         self.ui.display_player_names([{"name": p.name, "symbol": p.symbol.value} for p in self.players])
-        self.ui.display_positions()
+        self.ui.display_position_numbers()
 
         # Play by turns
-        index = self.first_to_play
+        index = 0 if self.player1_starts else 1
         while True:
             player = self.players[index]
-            win = do_turn(self.ui, player)
+            win = do_turn(self.ui, self.board, player)
             if win:
                 self.ui.ends_with_win(player.name)
                 break
@@ -60,6 +62,6 @@ class Game:
                 break
             index = (index + 1) % 2
 
-        # self.ui.refresh_board(str(self.board))
-        # self.ui.refresh_board(str(Board().from_str("XOX\n XO\n  O")))
+        # self.ui.display_board(str(self.board))
+        # self.ui.display_board(str(Board().from_str("XOX\n XO\n  O")))
         self.ui.end_game()

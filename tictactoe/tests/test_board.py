@@ -32,6 +32,24 @@ class TestBoardBaseMethods(unittest.TestCase):
         with self.assertRaises(ValueError):
             board.place(Position(1, 1), Symbol.O)
 
+    def test_available_positions(self):
+        board = Board.from_str("XXX\nOOO\nXXO")
+        self.assertEqual(board.available_positions(), [])
+        board = Board.from_str(" XX\nO O\nOX ")
+        self.assertEqual(board.available_positions(), [Position(0, 0), Position(1, 1), Position(2, 2)])
+
+    def test_position_to_index(self):
+        self.assertEqual(Board().position_to_index(Position(0, 0)), 1)
+        self.assertEqual(Board().position_to_index(Position(1, 1)), 5)
+        self.assertEqual(Board().position_to_index(Position(2, 1)), 8)
+        self.assertEqual(Board().position_to_index(Position(2, 2)), 9)
+
+    def test_index_to_position(self):
+        self.assertEqual(Board().index_to_position(1), Position(0, 0))
+        self.assertEqual(Board().index_to_position(5), Position(1, 1))
+        self.assertEqual(Board().index_to_position(8), Position(2, 1))
+        self.assertEqual(Board().index_to_position(9), Position(2, 2))
+
 
 class TestBoardWinner(unittest.TestCase):
     def test_board_wins_in_rows_is_true(self):

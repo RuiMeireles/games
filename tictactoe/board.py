@@ -44,6 +44,23 @@ class Board:
             raise ValueError("Can't place a symbol on a non-empty grid cell.")
         self.grid[position] = symbol
 
+    def available_positions(self) -> List[Position]:
+        available: List[Position] = []
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                position = Position(row, col)
+                if self.grid[position] == Symbol.EMPTY:
+                    available.append(position)
+        return available
+
+    @staticmethod
+    def position_to_index(position: Position) -> int:
+        return position.row * GRID_SIZE + position.col + 1
+
+    @staticmethod
+    def index_to_position(index: int) -> Position:
+        return Position((index - 1) // GRID_SIZE, (index - 1) % GRID_SIZE)
+
     def _wins_in_rows(self, symbol: Symbol) -> bool:
         for row in range(GRID_SIZE):
             if all([self.grid[Position(row, col)] == symbol for col in range(GRID_SIZE)]):
@@ -76,12 +93,3 @@ class Board:
         if winner[Symbol.O]:
             return Symbol.O
         return Symbol.EMPTY
-
-    def available_positions(self) -> List[Position]:
-        available: List[Position] = []
-        for row in range(GRID_SIZE):
-            for col in range(GRID_SIZE):
-                position = Position(row, col)
-                if self.grid[position] == Symbol.EMPTY:
-                    available.append(position)
-        return available

@@ -8,7 +8,7 @@ class CLI:
     def end_game(self) -> None:
         print("\nHope you enjoyed playing.\n")
 
-    def refresh_board(self, board_str: str) -> None:
+    def display_board(self, board_str: str) -> None:
         row_template = "  {} | {} | {}  \n"
         row_separator = "----+---+----\n"
         rows: List[str] = []
@@ -16,7 +16,7 @@ class CLI:
             rows.append(row_template.format(*row))
         print(row_separator.join(rows))
 
-    def get_number_of_players(self) -> int:
+    def get_number_of_human_players(self) -> int:
         while True:
             text = input("How many humans will play? [0, 1, 2] ")
             if text in ["0", "1", "2"]:
@@ -30,13 +30,22 @@ class CLI:
             print(f"Player #{i}: [{player['symbol']}] {player['name']}")
         print()
 
-    def display_positions(self) -> None:
+    def display_position_numbers(self) -> None:
         print("These are the positions you can choose to place your symbol:\n")
         board_str = "123\n456\n789"
-        self.refresh_board(board_str)
+        self.display_board(board_str)
 
     def players_turn(self, player_name: str) -> None:
         print(f"It's {player_name} turn.\n")
+
+    def get_move_from_human(self, available_moves: List[int]) -> int:
+        while True:
+            text = input("In which position would you like to place your symbol? ")
+            if not text.isdigit() or int(text) not in available_moves:
+                print(f"Invalid position. Please try again with a position in {available_moves}.\n")
+                continue
+            print()
+            return int(text)
 
     def ends_with_win(self, player_name: str) -> None:
         print(f"{player_name} wins.\n")
