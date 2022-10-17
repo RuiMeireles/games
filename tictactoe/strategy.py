@@ -1,5 +1,6 @@
+from dataclasses import dataclass
 from random import randint
-from typing import List, Optional, Protocol
+from typing import List, Optional, Protocol, Tuple
 
 from tictactoe.board import Board
 from tictactoe.common import Position, Symbol
@@ -15,6 +16,26 @@ def reverse_symbol(symbol: Symbol) -> Symbol:
 
 def random_position(positions: List[Position]) -> Position:
     return positions[randint(0, len(positions) - 1)]
+
+
+def classify_moves(board: Board, symbol: Symbol) -> Tuple[List[Position], List[Position], List[Position]]:
+    moves = board.available_positions()
+    winning_moves: List[Position] = []
+    forced_moves: List[Position] = []
+    other_moves: List[Position] = []
+    for move in moves:
+        b1 = Board.from_str(str(board))
+        b1.place(move, symbol)
+        if b1.get_winner() == symbol:
+            winning_moves.append(move)
+    for move in moves:
+        rev_symbol = reverse_symbol(symbol)
+        b2 = Board.from_str(str(board))
+        b2.place(move, rev_symbol)
+        if b2.get_winner() == rev_symbol and move not in winning_moves:
+            forced_moves.append(move)
+    other_moves = list(set(moves) - set(winning_moves) - set(forced_moves))
+    return (winning_moves, forced_moves, other_moves)
 
 
 class Strategy(Protocol):
@@ -59,3 +80,14 @@ class LookAheadStrategy:
         move = self._select_move_recursive(board, symbol)
         assert move is not None
         return move
+
+
+@dataclass
+class PositionEval:
+    score: float
+    next_moves: List[Position]
+
+
+# class RecursiveStrategy:
+#    def eval_position(self, board: Board):
+#        winning_moves, forced_moves, other_moves = moves()
