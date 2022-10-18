@@ -92,6 +92,8 @@ class LookAheadStrategy:
 @dataclass
 class RecursiveStrategy:
     eval_table: Dict[Tuple[str, Symbol], PositionEval] = field(default_factory=dict)
+    # When max_depth is None, full-depth and memoization are used
+    max_depth: Optional[int] = field(default=None)
 
     @staticmethod
     def _is_new_score_better(old_score: float, new_score: float, symbol: Symbol) -> bool:
@@ -101,14 +103,16 @@ class RecursiveStrategy:
             return new_score < old_score
         raise ValueError("Unsupported symbol")
 
-    def eval_position(self, board: Board, symbol: Symbol) -> float:
+    def eval_position(self, board: Board, symbol: Symbol, max_depth: Optional[int] = None) -> float:
+        if max_depth is not None:
+            max_depth -= 1
         if symbol not in [Symbol.X, Symbol.O]:
             raise ValueError("Unsupported symbol")
         win_score = 1.0 if symbol == Symbol.X else -1.0
         str_board = str(board)
         key = (str_board, symbol)
-        # Bail out if this position was already calculated (memoization)
-        if key in self.eval_table:
+        # When running in full-depth mode, bail out if this position was already calculated (memoization)
+        if max_depth is None and key in self.eval_table:
             return self.eval_table[key].score
         # Start evaluation
         winning_moves, forced_moves, other_moves = classify_moves(board, symbol)
@@ -127,19 +131,24 @@ class RecursiveStrategy:
             return 0.0
         # There are more moves, outcome isn't determined yet
         for position in remaining_moves:
-            new_board = Board.from_str(str_board)
-            new_board.place(position, symbol)
-            # Recursive search
-            score = self.eval_position(new_board, reverse_symbol(symbol))
+            if max_depth is None or max_depth > 0:
+                # Recursive search
+                new_board = Board.from_str(str_board)
+                new_board.place(position, symbol)
+                score = self.eval_position(new_board, reverse_symbol(symbol), max_depth)
+            else:
+                # Max_depth is reached, can't recurse
+                score = 0.0
             if key not in self.eval_table or self._is_new_score_better(self.eval_table[key].score, score, symbol):
                 # Found the first move, or a move better than the current ones
                 self.eval_table[key] = PositionEval(score, symbol, set([position]))
                 continue
             if self.eval_table[key].score == score:
+                # Found a move with a similar score to the existing ones
                 self.eval_table[key].next_moves.add(position)
         # Return the best score of all the evaluated moves
         return self.eval_table[key].score
 
     def select_move(self, board: Board, symbol: Symbol) -> Position:
-        self.eval_position(board, symbol)
+        self.eval_position(board, symbol, self.max_depth)
         return random_position(list(self.eval_table[(str(board), symbol)].next_moves))

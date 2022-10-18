@@ -1,12 +1,14 @@
 from dataclasses import dataclass, field
+from functools import partial
 from typing import List, Optional
 
 from tictactoe.board import Board
 from tictactoe.common import Symbol
 from tictactoe.player import Player, HumanPlayer, CPUPlayer
 from tictactoe.scoreboard import Scoreboard
-from tictactoe.strategy import RecursiveStrategy, Strategy, RandomStrategy
+from tictactoe.strategy import RecursiveStrategy, Strategy
 from tictactoe.ui import UI
+
 
 PLAYER_COMBINATIONS = {
     0: (CPUPlayer, CPUPlayer),
@@ -32,12 +34,15 @@ def do_turn(ui: UI, board: Board, player: Player) -> bool:
     return False
 
 
+RecursiveStrategy5 = partial(RecursiveStrategy, max_depth=5)
+
+
 @dataclass
 class Game:
     ui: UI
     board: Board = field(default_factory=Board)
     strategy_cpu1: Strategy = field(default_factory=RecursiveStrategy)
-    strategy_cpu2: Strategy = field(default_factory=RandomStrategy)
+    strategy_cpu2: Strategy = field(default_factory=RecursiveStrategy5)
     num_human_players: Optional[int] = field(default=None)
     scoreboard: Scoreboard = field(default_factory=Scoreboard)
     player1_starts: bool = field(default=True)
