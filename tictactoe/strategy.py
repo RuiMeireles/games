@@ -91,7 +91,7 @@ class LookAheadStrategy:
 
 @dataclass
 class RecursiveStrategy:
-    eval_table: Dict[str, PositionEval] = field(default_factory=dict)
+    eval_table: Dict[Tuple[str, Symbol], PositionEval] = field(default_factory=dict)
 
     @staticmethod
     def _is_new_score_better(old_score: float, new_score: float, symbol: Symbol) -> bool:
@@ -106,19 +106,20 @@ class RecursiveStrategy:
             raise ValueError("Unsupported symbol")
         win_score = 1.0 if symbol == Symbol.X else -1.0
         str_board = str(board)
+        key = (str_board, symbol)
         # Bail out if this position was already calculated (memoization)
-        if str_board in self.eval_table:
-            return self.eval_table[str_board].score
+        if key in self.eval_table:
+            return self.eval_table[key].score
         # Start evaluation
         winning_moves, forced_moves, other_moves = classify_moves(board, symbol)
         if winning_moves:
             # Wins
-            self.eval_table[str_board] = PositionEval(win_score, symbol, set(winning_moves))
+            self.eval_table[key] = PositionEval(win_score, symbol, set(winning_moves))
             return win_score
         if forced_moves:
             if len(forced_moves) > 1:
                 # Loses
-                self.eval_table[str_board] = PositionEval(-win_score, symbol, set(forced_moves))
+                self.eval_table[key] = PositionEval(-win_score, symbol, set(forced_moves))
                 return -win_score
         remaining_moves = forced_moves or other_moves
         # There are no more moves
@@ -128,14 +129,13 @@ class RecursiveStrategy:
         for position in remaining_moves:
             new_board = Board.from_str(str_board)
             new_board.place(position, symbol)
+            # Recursive search
             score = self.eval_position(new_board, reverse_symbol(symbol))
-            if str_board not in self.eval_table or self._is_new_score_better(
-                self.eval_table[str_board].score, score, symbol
-            ):
+            if key not in self.eval_table or self._is_new_score_better(self.eval_table[key].score, score, symbol):
                 # Found the first move, or a move better than the current ones
-                self.eval_table[str_board] = PositionEval(score, symbol, set([position]))
+                self.eval_table[key] = PositionEval(score, symbol, set([position]))
                 continue
-            if self.eval_table[str_board].score == score:
-                self.eval_table[str_board].next_moves.add(position)
+            if self.eval_table[key].score == score:
+                self.eval_table[key].next_moves.add(position)
         # Return the best score of all the evaluated moves
-        return self.eval_table[str_board].score
+        return self.eval_table[key].score

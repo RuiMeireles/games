@@ -10,6 +10,13 @@
             "request": "launch",
             "module": "tictactoe",
             "justMyCode": true
+        },
+        {
+            "name": "Python: UnitTest",
+            "type": "python",
+            "request": "launch",
+            "module": "unittest",
+            "justMyCode": true
         }
     ]
 }

@@ -2,7 +2,7 @@ import unittest
 
 from tictactoe.board import Board
 from tictactoe.common import Position, Symbol
-from tictactoe.strategy import classify_moves, random_position, reverse_symbol
+from tictactoe.strategy import RecursiveStrategy, classify_moves, random_position, reverse_symbol
 
 
 class TestStrategyFunctions(unittest.TestCase):
@@ -35,38 +35,35 @@ class TestStrategyFunctions(unittest.TestCase):
         self.assertEqual(other_moves, [])
 
 
-# class TestRecursiveStrategy(unittest.TestCase):
+class TestRecursiveStrategy(unittest.TestCase):
+    def test_is_new_score_better_is_True(self):
+        r = RecursiveStrategy()
+        self.assertTrue(r._is_new_score_better(0.0, 1, Symbol.X))  # type: ignore
+        self.assertTrue(r._is_new_score_better(0.0, -1, Symbol.O))  # type: ignore
+        self.assertFalse(r._is_new_score_better(0.0, 0.0, Symbol.X))  # type: ignore
+        self.assertFalse(r._is_new_score_better(0.0, 1, Symbol.O))  # type: ignore
+        with self.assertRaises(ValueError):
+            r._is_new_score_better(0.0, -1, Symbol.EMPTY)  # type: ignore
 
-# Winning position for X
-# r.eval_position(Board.from_str("XOO\n X \nX  "), Symbol.X)
-# 1.0
-# r.eval_position(Board.from_str("XOX\n X \nX  "), Symbol.O)
-# 1.0
-
-# Winning position for both
-# r.eval_position(Board.from_str("XO \nXO \n   "), Symbol.O)
-# -1.0
-# r.eval_position(Board.from_str("XO \nXO \n   "), Symbol.X)
-# 1.0
-
-# Drawing for both
-# r.eval_position(Board.from_str("OXO\n X \n OX"), Symbol.X)
-# 0.0
-# r.eval_position(Board.from_str("OXO\n X \n OX"), Symbol.O)
-# 0.0
-# r.eval_position(Board.from_str("O  \n X \nX  "), Symbol.O)
-# 0.0
-# r.eval_position(Board.from_str("O O\n X \nX  "), Symbol.X)
-# 0.0
-# r.eval_position(Board.from_str("XO \n O \n  X"), Symbol.X)
-# esta esta correcta, e todas joagas sao forcadas
-
-# r.eval_position(Board.from_str("X  \n O \n  X"), Symbol.O)
-# esta esta errada, devia empatar
-
-# ERROR!!! (they all should tie)
-# r.eval_position(Board.from_str("   \n X \n   "), Symbol.O)
-# r.eval_position(Board.from_str("X  \n   \n   "), Symbol.O)
-# r.eval_position(Board.from_str("X  \n O \n   "), Symbol.X)
-# r.eval_position(Board.from_str("X  \n O \n  X"), Symbol.O)
-# 0.0
+    def test_eval_position(self):
+        # Winning positions for X
+        r = RecursiveStrategy()
+        self.assertEqual(r.eval_position(Board.from_str("XOO\n X \nX  "), Symbol.X), 1.0)
+        self.assertEqual(r.eval_position(Board.from_str("XOX\n X \nX  "), Symbol.O), 1.0)
+        # Winning for X, all moves are forced
+        self.assertEqual(r.eval_position(Board.from_str("X O\n O \n  X"), Symbol.X), 1.0)
+        # Winning position for both
+        self.assertEqual(r.eval_position(Board.from_str("XO \nXO \n   "), Symbol.O), -1.0)
+        self.assertEqual(r.eval_position(Board.from_str("XO \nXO \n   "), Symbol.X), 1.0)
+        # Drawing positions for both
+        self.assertEqual(r.eval_position(Board.from_str("OXO\n X \n OX"), Symbol.X), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("OXO\n X \n OX"), Symbol.O), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("O  \n X \nX  "), Symbol.O), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("O O\n X \nX  "), Symbol.X), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("XO \n O \n  X"), Symbol.X), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("X  \n O \n  X"), Symbol.O), 0.0)
+        # Drawing positions, initial stages
+        self.assertEqual(r.eval_position(Board.from_str("   \n X \n   "), Symbol.O), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("X  \n   \n   "), Symbol.O), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("X  \n O \n   "), Symbol.X), 0.0)
+        self.assertEqual(r.eval_position(Board.from_str("X  \n O \n  X"), Symbol.O), 0.0)
