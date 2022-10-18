@@ -67,3 +67,6 @@ class TestRecursiveStrategy(unittest.TestCase):
         self.assertEqual(r.eval_position(Board.from_str("X  \n   \n   "), Symbol.O), 0.0)
         self.assertEqual(r.eval_position(Board.from_str("X  \n O \n   "), Symbol.X), 0.0)
         self.assertEqual(r.eval_position(Board.from_str("X  \n O \n  X"), Symbol.O), 0.0)
+        # Unsupported Symbol
+        with self.assertRaises(ValueError):
+            r.eval_position(Board(), Symbol.EMPTY)

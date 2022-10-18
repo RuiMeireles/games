@@ -95,11 +95,11 @@ class RecursiveStrategy:
 
     @staticmethod
     def _is_new_score_better(old_score: float, new_score: float, symbol: Symbol) -> bool:
-        if symbol not in [Symbol.X, Symbol.O]:
-            raise ValueError("Unsupported symbol")
         if symbol == Symbol.X:
             return new_score > old_score
-        return new_score < old_score
+        if symbol == Symbol.O:
+            return new_score < old_score
+        raise ValueError("Unsupported symbol")
 
     def eval_position(self, board: Board, symbol: Symbol) -> float:
         if symbol not in [Symbol.X, Symbol.O]:
@@ -139,3 +139,7 @@ class RecursiveStrategy:
                 self.eval_table[key].next_moves.add(position)
         # Return the best score of all the evaluated moves
         return self.eval_table[key].score
+
+    def select_move(self, board: Board, symbol: Symbol) -> Position:
+        self.eval_position(board, symbol)
+        return random_position(list(self.eval_table[(str(board), symbol)].next_moves))

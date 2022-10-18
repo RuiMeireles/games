@@ -5,7 +5,7 @@ from tictactoe.board import Board
 from tictactoe.common import Symbol
 from tictactoe.player import Player, HumanPlayer, CPUPlayer
 from tictactoe.scoreboard import Scoreboard
-from tictactoe.strategy import Strategy, RandomStrategy
+from tictactoe.strategy import RecursiveStrategy, Strategy, RandomStrategy
 from tictactoe.ui import UI
 
 PLAYER_COMBINATIONS = {
@@ -36,7 +36,7 @@ def do_turn(ui: UI, board: Board, player: Player) -> bool:
 class Game:
     ui: UI
     board: Board = field(default_factory=Board)
-    strategy_cpu1: Strategy = field(default_factory=RandomStrategy)
+    strategy_cpu1: Strategy = field(default_factory=RecursiveStrategy)
     strategy_cpu2: Strategy = field(default_factory=RandomStrategy)
     num_human_players: Optional[int] = field(default=None)
     scoreboard: Scoreboard = field(default_factory=Scoreboard)
