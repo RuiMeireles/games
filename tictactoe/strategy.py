@@ -1,9 +1,16 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from random import randint
-from typing import List, Optional, Protocol, Tuple
+from typing import Dict, List, Optional, Protocol, Set, Tuple
 
 from tictactoe.board import Board
 from tictactoe.common import Position, Symbol
+
+
+@dataclass
+class PositionEval:
+    score: float
+    symbol: Symbol
+    next_moves: Set[Position]
 
 
 def reverse_symbol(symbol: Symbol) -> Symbol:
@@ -83,11 +90,52 @@ class LookAheadStrategy:
 
 
 @dataclass
-class PositionEval:
-    score: float
-    next_moves: List[Position]
+class RecursiveStrategy:
+    eval_table: Dict[str, PositionEval] = field(default_factory=dict)
 
+    @staticmethod
+    def _is_new_score_better(old_score: float, new_score: float, symbol: Symbol) -> bool:
+        if symbol not in [Symbol.X, Symbol.O]:
+            raise ValueError("Unsupported symbol")
+        if symbol == Symbol.X:
+            return new_score > old_score
+        return new_score < old_score
 
-# class RecursiveStrategy:
-#    def eval_position(self, board: Board):
-#        winning_moves, forced_moves, other_moves = moves()
+    def eval_position(self, board: Board, symbol: Symbol) -> float:
+        if symbol not in [Symbol.X, Symbol.O]:
+            raise ValueError("Unsupported symbol")
+        win_score = 1.0 if symbol == Symbol.X else -1.0
+        str_board = str(board)
+        # Bail out if this position was already calculated (memoization)
+        if str_board in self.eval_table:
+            return self.eval_table[str_board].score
+        # Start evaluation
+        winning_moves, forced_moves, other_moves = classify_moves(board, symbol)
+        if winning_moves:
+            # Wins
+            self.eval_table[str_board] = PositionEval(win_score, symbol, set(winning_moves))
+            return win_score
+        if forced_moves:
+            if len(forced_moves) > 1:
+                # Loses
+                self.eval_table[str_board] = PositionEval(-win_score, symbol, set(forced_moves))
+                return -win_score
+        remaining_moves = forced_moves or other_moves
+        # There are no more moves
+        if not remaining_moves:
+            return 0.0
+        # There are more moves, outcome isn't determined yet
+        for position in remaining_moves:
+            new_board = Board.from_str(str_board)
+            new_board.place(position, symbol)
+            score = self.eval_position(new_board, reverse_symbol(symbol))
+            if str_board not in self.eval_table or self._is_new_score_better(
+                self.eval_table[str_board].score, score, symbol
+            ):
+                # Found the first move, or a move better than the current ones
+                self.eval_table[str_board] = PositionEval(score, symbol, set([position]))
+                continue
+            if self.eval_table[str_board].score == score:
+                self.eval_table[str_board].next_moves.add(position)
+        # Return the best score of all the evaluated moves
+        return self.eval_table[str_board].score
