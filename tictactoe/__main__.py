@@ -8,7 +8,10 @@ def main() -> None:
     # game = Game(cli)
     # game = Game(cli, num_human_players=0, strategy_cpu1=RecursiveStrategy(), strategy_cpu2=LookAheadStrategy())
     game = Game(
-        cli, num_human_players=0, strategy_cpu1=RecursiveStrategy(), strategy_cpu2=RecursiveStrategy(max_depth=5)
+        # cli, num_human_players=0, strategy_cpu1=RecursiveStrategy(), strategy_cpu2=RecursiveStrategy(max_depth=5)
+        cli,
+        num_human_players=1,
+        strategy_cpu1=RecursiveStrategy(max_depth=5),
     )
     game.play()
 

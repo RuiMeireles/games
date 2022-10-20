@@ -45,6 +45,49 @@ class TestRecursiveStrategy(unittest.TestCase):
         with self.assertRaises(ValueError):
             r._is_new_score_better(0.0, -1, Symbol.EMPTY)  # type: ignore
 
+    params_eval_position_succedds = [
+        # (board_str, symbol, score)
+        # Winning positions for X
+        ("XOO\n X \nX  ", Symbol.X, 1.0),
+        ("XOX\n X \nX  ", Symbol.O, 1.0),
+        # Winning for X, all moves are forced
+        ("X O\n O \n  X", Symbol.X, 1.0),
+        # Winning position for both
+        ("XO \nXO \n   ", Symbol.O, -1.0),
+        ("XO \nXO \n   ", Symbol.X, 1.0),
+        # Drawing positions for both
+        ("OXO\n X \n OX", Symbol.X, 0.0),
+        ("OXO\n X \n OX", Symbol.O, 0.0),
+        ("O  \n X \nX  ", Symbol.O, 0.0),
+        ("O O\n X \nX  ", Symbol.X, 0.0),
+        ("XO \n O \n  X", Symbol.X, 0.0),
+        ("X  \n O \n  X", Symbol.O, 0.0),
+        # Drawing positions, initial stages
+        ("   \n X \n   ", Symbol.O, 0.0),
+        ("X  \n   \n   ", Symbol.O, 0.0),
+        ("X  \n O \n   ", Symbol.X, 0.0),
+        ("X  \n O \n  X", Symbol.O, 0.0),
+    ]
+    params_eval_position_fails = [
+        # (board_str, symbol)
+        # Unsupported Symbol
+        ("   \n   \n   ", Symbol.EMPTY),
+    ]
+
+    def test_eval_position_succedds(self):
+        r = RecursiveStrategy()
+        for board_str, symbol, score in self.params_eval_position_succedds:
+            with self.subTest():
+                self.assertEqual(r.eval_position(Board.from_str(board_str), symbol), score)
+
+    def test_eval_position_fails(self):
+        r = RecursiveStrategy()
+        for board_str, symbol in self.params_eval_position_fails:
+            with self.subTest():
+                with self.assertRaises(ValueError):
+                    r.eval_position(Board.from_str(board_str), symbol)
+
+    # Same tests as above, but non-parameterized
     def test_eval_position(self):
         # Winning positions for X
         r = RecursiveStrategy()
